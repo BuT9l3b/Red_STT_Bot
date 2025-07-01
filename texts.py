@@ -1,10 +1,9 @@
-start_command = """👋 Привет! Я — бот для распознавания голосовых сообщений.  
-Отправь мне голосовую запись или "кружок", и я преобразую его в текст.
-"""
+start_command = """👋 Hi! I'm a bot for transcribing voice messages.
+Send me a voice message or a "video note", and I'll convert it to text."""
 
-stt_processing = "👂 Обработка..."
+stt_processing = "👂 Processing..."
 
-send_voice_error = "❌ Произошла ошибка при отправке аудио: {}."
-send_document_error = "❌ Произошла ошибка при отправке документа: {}."
-send_photo_error = "❌ Ошибка при отправке изображения: {}"
-send_message_error =  "❌ Ошибка при отправке сообщения: {}"
+send_voice_error = "❌ An error occurred while sending the audio: {}."
+send_document_error = "❌ An error occurred while sending the document: {}."
+send_photo_error = "❌ An error occurred while sending the image: {}"
+send_message_error =  "❌ An error occurred while sending the message: {}"
