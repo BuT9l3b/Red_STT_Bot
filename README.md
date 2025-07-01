@@ -15,7 +15,7 @@ A Telegram bot for speech recognition from voice and video messages using Nexara
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/BuT9l3b_AI_Bot/Red_STT_Bot.git
+git clone https://github.com/BuT9l3b/Red_STT_Bot.git
 cd Red_STT_Bot
 ```
 
