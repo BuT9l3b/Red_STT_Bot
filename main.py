@@ -73,7 +73,7 @@ async def process_voice(message: types.Message, bot: Bot):
 
 
 async def main():
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
     logfire.info("Bot has been started")
 
 if __name__ == "__main__":
