@@ -4,18 +4,20 @@ import httpx
 import logfire
 
 
-class OpenaiSTT:
+class BaseOpenAISTT:
     def __init__(
             self,
             api_key: str,
             base_url: str,
             default_model: str = "whisper-1",
-            default_language: str = "auto"
+            default_language: str = "auto",
+            default_temperature: float = 0.1
     ):
         self.api_key = api_key
         self.base_url = base_url
         self.default_model = default_model
         self.default_language = default_language
+        self.default_temperature = default_temperature
 
     def _make_client(self) -> AsyncOpenAI:
         return AsyncOpenAI(
@@ -28,13 +30,15 @@ class OpenaiSTT:
             self,
             audio_data: bytes,
             model: Optional[str] = None,
-            language: Optional[str] = None
+            language: Optional[str] = None,
+            temperature: Optional[float] = None
     ) -> Any:
         client = self._make_client()
         return await client.audio.transcriptions.create(
             model=model or self.default_model,
             file=audio_data,
-            language=language or self.default_language
+            language=language or self.default_language,
+            temperature=temperature or self.default_temperature
         )
 
 
