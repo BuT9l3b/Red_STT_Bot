@@ -4,7 +4,7 @@ import httpx
 import logfire
 
 
-class BaseOpenAISTT:
+class OpenaiSTT:
     def __init__(
             self,
             api_key: str,
