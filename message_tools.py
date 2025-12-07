@@ -1,5 +1,5 @@
 from typing import Union, List, Optional, Any, Callable
-from aiogram.types import Message
+from aiogram.types import Message, InputFile
 import aiogram.exceptions as exc
 import telegramify_markdown
 import logging
@@ -120,6 +120,62 @@ class MessageTools:
             )
         except Exception as e:
             return await MessageTools._handle_telegram_error(message, e, "message")
+    
+    @staticmethod
+    async def _send_media(
+        message: Message,
+        media_type: str,
+        media: InputFile,
+        text: Optional[str] = None,
+        is_reply: bool = True, **kwargs
+    ) -> Union[Message, bool]:
+        """
+        Universal method for sending media messages in Telegram.
+        
+        Args:
+            message (Message): Telegram message object to attach media to
+            media_type (str): Type of media content ('photo', 'voice', 'document', etc.)
+            media (InputFile): Media file to send
+            text (Optional[str]): Caption text for the media message (optional)
+            is_reply (bool): Flag indicating whether to send as a reply to the message
+            **kwargs: Additional parameters for the send method
+        
+        Returns:
+            Union[Message, bool]: Sent message object on success, False on error
+        
+        Usage examples:
+            # Sending a photo:
+            await _send_media(message, "photo", photo_file, "Photo caption")
+            
+            # Sending a voice message:
+            await _send_media(message, "voice", voice_file)
+            
+            # Sending a document:
+            await _send_media(message, "document", doc_file, "Document description")
+        """
+        user_id = message.from_user.id
+        try:
+            # Dynamically form the send method name based on media type
+            # Examples: reply_photo, answer_voice, reply_document, etc.
+            send_method = getattr(message, f"{'reply' if is_reply else 'answer'}_{media_type}")
+            
+            # Form parameters for the send method media_type is used as the parameter key (photo=..., voice=..., document=...)
+            mes = await send_method(**{media_type: media, 'caption': text, **kwargs})
+            
+            logfire.info(f"Successfully sent {media_type} for user {user_id}")
+            return mes
+        except Exception as e:
+            # In case of error, use the common error handler with the possibility of retrying without reply
+            return await MessageTools._handle_telegram_error(
+                message, e, media_type,
+                lambda m, is_reply: MessageTools._send_media(m, media_type, media, text, is_reply, **kwargs)
+            )
+
+    @staticmethod
+    async def send_document(message: Message, document: InputFile, text: Optional[str] = None,
+                            is_reply: bool = True, **kwargs) -> Union[Message, bool]:
+        """Sends a document to the user."""
+        return await MessageTools._send_media(message, "document", document, text, is_reply, **kwargs)
 
 
 class MessagesEdit:

@@ -8,6 +8,7 @@ from logfire import instrument
 import logfire
 import logging
 import asyncio
+import io
 import os
 
 from message_tools import MessageTools
@@ -50,6 +51,30 @@ async def process_voice(message: types.Message, bot: Bot):
         await MessageTools.send_response(message, md.expandable_blockquote(data)[:-2])
     except Exception as e:
         logfire.error("Error processing voice message", error=str(e), _exc_info=True)
+        await MessageTools.send_response(message, texts.stt_error.format(e))
+
+
+@dp.message(F.audio, F.chat.type == "private")
+@instrument("Processing audio file")
+async def process_audio_file(message: types.Message, bot: Bot):
+    """Handler for audio files for transcription."""
+    try:
+        file_info = await bot.get_file(message.audio.file_id)
+        
+        logfire.info("Downloading audio file")
+        downloaded_file = await bot.download_file(file_info.file_path)
+        
+        logfire.info("Starting audio transcription")
+        data = await STT.audio_analyze(downloaded_file.read())
+
+        # Create a new file in memory with the transcription text
+        temp_file = io.BytesIO(data.encode('utf-8'))
+        text_file = types.BufferedInputFile(temp_file.read(), filename="transcription.txt")
+        
+        await MessageTools.send_document(message, text_file)
+        
+    except Exception as e:
+        logfire.error("Error processing audio file", error=str(e), _exc_info=True)
         await MessageTools.send_response(message, texts.stt_error.format(e))
 
 
